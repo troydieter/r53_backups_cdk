@@ -6,6 +6,7 @@ from aws_cdk.aws_iam import ManagedPolicy
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_s3 import Bucket, BlockPublicAccess, BucketEncryption, LifecycleRule, Transition, StorageClass
 from aws_cdk.aws_events_targets import LambdaFunction, SnsTopic
+from aws_cdk.aws_sns import Topic
 from constructs import Construct
 
 
@@ -46,7 +47,7 @@ class R53Stack(Stack):
         r53_backup_func.role.add_managed_policy(r53_read_only_pol)
 
         # Create the SNS topic to send notifications to
-        r53_backup_topic = SnsTopic(self, "R53BackupTopic")
+        r53_backup_topic = Topic(self, "R53BackupTopic")
         r53_backup_topic.grant_publish(r53_backup_func.role)
 
         # Create the EventBridge rules
@@ -70,7 +71,7 @@ class R53Stack(Stack):
                                                  "errorMessage": ".*"
                                              }
                                          ),
-                                         targets=[SnsTopic(topic=r53_backup_topic.topic)])
+                                         targets=[SnsTopic(topic=r53_backup_topic)])
 
         # Outputs
 
