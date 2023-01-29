@@ -13,6 +13,6 @@ props = {
     "hosted_zone_id": app.node.try_get_context("hosted_zone_id")
 }
 
-R53Stack(app, "R53_Backup_Stack", props=props, description=f"Backup of {props['namespace']}-stack")
+R53Stack(app, "R53BackupStack", props=props, description=f"Backup of {props['namespace']}-stack")
 
 app.synth()

@@ -54,7 +54,7 @@ def create_s3_bucket(bucket_name, bucket_region='us-east-1'):
     return response
 
 
-def upload_to_s3(folder, filename, bucket_name, key):
+def upload_to_s3(folder: object, filename: object, bucket_name: object, key: object) -> object:
     """Upload a file to a folder in an Amazon S3 bucket."""
     key = folder + '/' + key
     s3.upload_file(filename, bucket_name, key)
@@ -176,11 +176,7 @@ def lambda_handler(event, context):
     time_stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                datetime.utcnow().utctimetuple()
                                )
-    if (not create_s3_bucket(s3_bucket_name, s3_bucket_region)):
-        return False
-    # bucket_response = create_s3_bucket(s3_bucket_name, s3_bucket_region)
-    # if(not bucket_response):
-    # return False
+
     hosted_zones = get_route53_hosted_zones()
     for zone in hosted_zones:
         zone_folder = (time_stamp + '/' + zone['Name'][:-1])

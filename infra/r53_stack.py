@@ -38,15 +38,16 @@ class R53Stack(Stack):
 
         # Create the Lambda function to facilitate all of this
         r53_backup_func = Function(self, "R53_import_function", runtime=Runtime.PYTHON_3_9,
-                                   handler="r53_lambda_function.lambda_handler", code=Code.from_asset("functions"))
+                                   handler="r53_lambda_function.lambda_handler",
+                                   code=Code.from_asset(path="infra/functions"))
 
         # Set the AWS IAM permissions for a role to execute
         backup_bucket.grant_read_write(r53_backup_func.role)
         r53_backup_func.role.add_to_principal_policy(PolicyStatement(actions=["route53:Get*"],
-                                                                     resources=[route53_zone_import.hosted_zone_arn]))
+                                                                     resources=[f"{route53_zone_import.hosted_zone_arn}"]))
 
         # Outputs
 
-        CfnOutput(self, "S3BackupBucketName", value=backup_bucket.bucket_name, description="The name of the Amazon S3 "
-                                                                                           "Bucket",
-                  export_name=f"{namespace}" + backup_bucket.bucket_name)
+        CfnOutput(self, "R53BackupBucketName", value=backup_bucket.bucket_name, description="The name of the Amazon S3 "
+                                                                                            "Bucket",
+                  export_name="R53BackupBucket")
