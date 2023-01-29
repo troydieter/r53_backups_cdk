@@ -97,55 +97,51 @@ def get_record_value(record):
 
 def try_record(test, record):
     """Return a value for a record"""
-    # test for Key and Type errors
-    try:
-        value = record[test]
-    except KeyError:
-        value = ''
-    except TypeError:
-        value = ''
-    return value
+    """Return a value for a record"""
+    return record.get(test, '')
 
 
 def write_zone_to_csv(zone, zone_records):
     """Write hosted zone records to a csv file in /tmp/."""
-    zone_file_name = '/tmp/' + zone['Name'] + 'csv'
-    # write to csv file with zone name
+    zone_file_name = '/tmp/' + zone['Name'] + '.csv'
+    fieldnames = [
+        'NAME', 'TYPE', 'VALUE',
+        'TTL', 'REGION', 'WEIGHT',
+        'SETID', 'FAILOVER', 'EVALUATE_HEALTH'
+    ]
     with open(zone_file_name, 'w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        # write column headers
-        writer.writerow([
-            'NAME', 'TYPE', 'VALUE',
-            'TTL', 'REGION', 'WEIGHT',
-            'SETID', 'FAILOVER', 'EVALUATE_HEALTH'
-        ])
-        # loop through all the records for a given zone
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
         for record in zone_records:
-            csv_row = [''] * 9
-            csv_row[0] = record['Name']
-            csv_row[1] = record['Type']
-            csv_row[3] = try_record('TTL', record)
-            csv_row[4] = try_record('Region', record)
-            csv_row[5] = try_record('Weight', record)
-            csv_row[6] = try_record('SetIdentifier', record)
-            csv_row[7] = try_record('Failover', record)
-            csv_row[8] = try_record('EvaluateTargetHealth',
-                                    try_record('AliasTarget', record)
-                                    )
-            value = get_record_value(record)
-            # if multiple values (e.g., MX records), write each as its own row
-            for v in value:
-                csv_row[2] = v
-                writer.writerow(csv_row)
+            values = get_record_value(record)
+            for value in values:
+                writer.writerow({
+                    'NAME': record['Name'],
+                    'TYPE': record['Type'],
+                    'VALUE': value,
+                    'TTL': try_record('TTL', record),
+                    'REGION': try_record('Region', record),
+                    'WEIGHT': try_record('Weight', record),
+                    'SETID': try_record('SetIdentifier', record),
+                    'FAILOVER': try_record('Failover', record),
+                    'EVALUATE_HEALTH': try_record(
+                        'EvaluateTargetHealth', try_record('AliasTarget', record)
+                    )
+                })
     return zone_file_name
 
 
 def write_zone_to_json(zone, zone_records):
     """Write hosted zone records to a json file in /tmp/."""
-    zone_file_name = '/tmp/' + zone['Name'] + 'json'
-    # write to json file with zone name
-    with open(zone_file_name, 'w') as json_file:
-        json.dump(zone_records, json_file, indent=4)
+    # create the file name
+    zone_file_name = '/tmp/' + zone['Name'] + '.json'
+    try:
+        # use context manager to write the records to the file
+        with open(zone_file_name, 'w') as json_file:
+            json.dump(zone_records, json_file, indent=4)
+    except Exception as e:
+        print(f"Error writing to file: {e}")
+        return None
     return zone_file_name
 
 
