@@ -8,75 +8,24 @@ from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 
-# Set environmental variables
-
-s3_bucket_name = ''
-s3_bucket_region = ''
-
 try:
     s3_bucket_name = os.environ['s3_bucket_name']
     s3_bucket_region = os.environ['s3_bucket_region']
+    r53_zone_id = os.environ['r53_zone_id']
 except KeyError as e:
     print("Warning: Environmental variable(s) not defined")
 
 # Create client objects
 
-s3 = boto3.client('s3', region_name='us-east-1')
+s3 = boto3.client('s3', region_name=s3_bucket_region)
 route53 = boto3.client('route53')
 
 
 # Functions
-
-def create_s3_bucket(bucket_name, bucket_region='us-east-1'):
-    """Create an Amazon S3 bucket."""
-    try:
-        response = s3.head_bucket(Bucket=bucket_name)
-        return response
-    except ClientError as e:
-        if (e.response['Error']['Code'] != '404'):
-            print(e)
-            return None
-    # creating bucket in us-east-1 (N. Virginia) requires
-    # no CreateBucketConfiguration parameter be passed
-    if (bucket_region == 'us-east-1'):
-        response = s3.create_bucket(
-            ACL='private',
-            Bucket=bucket_name
-        )
-    else:
-        response = s3.create_bucket(
-            ACL='private',
-            Bucket=bucket_name,
-            CreateBucketConfiguration={
-                'LocationConstraint': bucket_region
-            }
-        )
-    return response
-
-
 def upload_to_s3(folder: object, filename: object, bucket_name: object, key: object) -> object:
     """Upload a file to a folder in an Amazon S3 bucket."""
     key = folder + '/' + key
     s3.upload_file(filename, bucket_name, key)
-
-
-def get_route53_hosted_zones(next_zone=None):
-    """Recursively returns a list of hosted zones in Amazon Route 53."""
-    if (next_zone):
-        response = route53.list_hosted_zones_by_name(
-            DNSName=next_zone[0],
-            HostedZoneId=next_zone[1]
-        )
-    else:
-        response = route53.list_hosted_zones_by_name()
-    hosted_zones = response['HostedZones']
-    # if response is truncated, call function again with next zone name/id
-    if (response['IsTruncated']):
-        hosted_zones += get_route53_hosted_zones(
-            (response['NextDNSName'],
-             response['NextHostedZoneId'])
-        )
-    return hosted_zones
 
 
 def get_route53_zone_records(zone_id, next_record=None):
