@@ -20,8 +20,7 @@ class R53Stack(Stack):
 
         # Amazon SNS Topic for alerting events
         watchful_topic = Topic(self, "WatchfulTopic")
-        wf = Watchful(self, "Watchful", alarm_sns=watchful_topic)
-        watchful_topic.grant_publish(wf.node.find_child('WatchfulLambda').role)
+        wf = Watchful(self, "Watchful", alarm_sns=watchful_topic, dashboard_name=f"{namespace}-r53-dashboard")
         wf.watch_scope(self)
 
         # Route53 S3 Backup Bucket
