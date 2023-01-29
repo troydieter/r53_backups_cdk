@@ -59,19 +59,7 @@ class R53Stack(Stack):
 
         backup_frequency_rule.add_target(LambdaFunction(r53_backup_func))
 
-        failure_notification_rule = Rule(self, "R53BackupFailureNotification",
-                                         event_pattern=EventPattern(
-                                             source=["aws.lambda"],
-                                             detail_type=["AWS API Call via CloudTrail"],
-                                             detail={
-                                                 "eventName": ["CreateFunction"],
-                                                 "requestParameters": {
-                                                     "functionName": r53_backup_func.function_name
-                                                 },
-                                                 "errorMessage": ".*"
-                                             }
-                                         ),
-                                         targets=[SnsTopic(topic=r53_backup_topic)])
+
 
         # Outputs
 
