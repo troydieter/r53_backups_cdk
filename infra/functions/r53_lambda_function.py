@@ -149,9 +149,7 @@ def write_zone_to_json(zone, zone_records):
 
 def lambda_handler(event, context):
     """Handler function for AWS Lambda"""
-    time_stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                               datetime.utcnow().utctimetuple()
-                               )
+    time_stamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
 
     hosted_zoned = get_route53_hosted_zones()
     for zone in hosted_zoned:
