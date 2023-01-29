@@ -96,8 +96,14 @@ def get_record_value(record):
 
 def try_record(test, record):
     """Return a value for a record"""
-    """Return a value for a record"""
-    return record.get(test, '')
+    # test for Key and Type errors
+    try:
+        value = record[test]
+    except KeyError:
+        value = ''
+    except TypeError:
+        value = ''
+    return value
 
 
 def write_zone_to_csv(zone, zone_records):
