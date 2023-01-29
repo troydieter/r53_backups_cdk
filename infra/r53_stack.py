@@ -1,13 +1,14 @@
 from aws_cdk import (
     Stack, Tags, RemovalPolicy, Duration, CfnOutput
 )
-from aws_cdk.aws_events import Rule, Schedule, EventPattern
+from aws_cdk.aws_events import Rule, Schedule
+from aws_cdk.aws_events_targets import LambdaFunction
 from aws_cdk.aws_iam import ManagedPolicy
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_s3 import Bucket, BlockPublicAccess, BucketEncryption, LifecycleRule, Transition, StorageClass
-from aws_cdk.aws_events_targets import LambdaFunction, SnsTopic
 from aws_cdk.aws_sns import Topic
 from constructs import Construct
+from cdk_watchful import Watchful
 
 
 class R53Stack(Stack):
@@ -16,6 +17,12 @@ class R53Stack(Stack):
         super().__init__(scope, construct_id, **kwargs)
         namespace = props["namespace"]
         Tags.of(self).add("project", namespace)
+
+        # Amazon SNS Topic for alerting events
+        watchful_topic = Topic(self, "WatchfulTopic")
+        wf = Watchful(self, "Watchful", alarm_sns=watchful_topic)
+        watchful_topic.grant_publish(wf.node.find_child('WatchfulLambda').role)
+        wf.watch_scope(self)
 
         # Route53 S3 Backup Bucket
         # noinspection PyTypeChecker
@@ -46,10 +53,6 @@ class R53Stack(Stack):
         r53_read_only_pol = ManagedPolicy.from_aws_managed_policy_name('AmazonRoute53ReadOnlyAccess')
         r53_backup_func.role.add_managed_policy(r53_read_only_pol)
 
-        # Create the SNS topic to send notifications to
-        r53_backup_topic = Topic(self, "R53BackupTopic")
-        r53_backup_topic.grant_publish(r53_backup_func.role)
-
         # Create the EventBridge rules
         backup_frequency_rule = Rule(
             self,
@@ -58,8 +61,6 @@ class R53Stack(Stack):
         )
 
         backup_frequency_rule.add_target(LambdaFunction(r53_backup_func))
-
-
 
         # Outputs
 
