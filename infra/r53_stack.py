@@ -1,11 +1,11 @@
 from aws_cdk import (
     Stack, Tags, RemovalPolicy, Duration, CfnOutput
 )
-from aws_cdk.aws_events import Rule, Schedule
+from aws_cdk.aws_events import Rule, Schedule, EventPattern
 from aws_cdk.aws_iam import ManagedPolicy
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_s3 import Bucket, BlockPublicAccess, BucketEncryption, LifecycleRule, Transition, StorageClass
-from aws_cdk.aws_events_targets import LambdaFunction
+from aws_cdk.aws_events_targets import LambdaFunction, SnsTopic
 from constructs import Construct
 
 
@@ -45,14 +45,32 @@ class R53Stack(Stack):
         r53_read_only_pol = ManagedPolicy.from_aws_managed_policy_name('AmazonRoute53ReadOnlyAccess')
         r53_backup_func.role.add_managed_policy(r53_read_only_pol)
 
-        # Create the EventBridge rule
-        rule = Rule(
+        # Create the SNS topic to send notifications to
+        r53_backup_topic = SnsTopic(self, "R53BackupTopic")
+        r53_backup_topic.grant_publish(r53_backup_func.role)
+
+        # Create the EventBridge rules
+        backup_frequency_rule = Rule(
             self,
             "Run Daily at 21:00 hrs UTC",
             schedule=Schedule.cron(minute="00", hour="21", week_day="*", month="*", year="*"),
         )
 
-        rule.add_target(LambdaFunction(r53_backup_func))
+        backup_frequency_rule.add_target(LambdaFunction(r53_backup_func))
+
+        failure_notification_rule = Rule(self, "R53BackupFailureNotification",
+                                         event_pattern=EventPattern(
+                                             source=["aws.lambda"],
+                                             detail_type=["AWS API Call via CloudTrail"],
+                                             detail={
+                                                 "eventName": ["CreateFunction"],
+                                                 "requestParameters": {
+                                                     "functionName": r53_backup_func.function_name
+                                                 },
+                                                 "errorMessage": ".*"
+                                             }
+                                         ),
+                                         targets=[SnsTopic(topic=r53_backup_topic.topic)])
 
         # Outputs
 
