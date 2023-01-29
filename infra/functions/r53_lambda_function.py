@@ -5,7 +5,6 @@ import json
 import os
 import time
 from datetime import datetime
-from pathlib import Path
 from typing import Optional, Tuple, List
 
 import boto3
@@ -33,24 +32,6 @@ def upload_to_s3(folder: str, filename: str, bucket_name: str, key: str) -> None
         raise Exception(f"Failed to upload {filename} to S3 bucket {bucket_name} due to {e}")
 
 
-# def get_route53_hosted_zones(next_zone=None):
-#     """Recursively returns a list of hosted zones in Amazon Route 53."""
-#     if next_zone:
-#         response = route53.list_hosted_zones_by_name(
-#             DNSName=next_zone[0],
-#             HostedZoneId=next_zone[1]
-#         )
-#     else:
-#         response = route53.list_hosted_zones_by_name()
-#     hosted_zones = response['HostedZones']
-#     # if response is truncated, call function again with next zone name/id
-#     if response['IsTruncated']:
-#         hosted_zones += get_route53_hosted_zones(
-#             (response['NextDNSName'],
-#              response['NextHostedZoneId'])
-#         )
-#     return hosted_zones
-
 def get_route53_hosted_zones(next_zone: Optional[Tuple[str, str]] = None) -> List[dict]:
     """Recursively returns a list of hosted zones in Amazon Route 53."""
     try:
@@ -74,16 +55,20 @@ def get_route53_hosted_zones(next_zone: Optional[Tuple[str, str]] = None) -> Lis
     return hosted_zones
 
 
-def get_route53_zone_records(zone_id, next_record=None):
+def get_route53_zone_records(zone_id: str, next_record: Optional[Tuple[str, str]] = None) -> List[dict]:
     """Recursively returns a list of records of a hosted zone in Route 53."""
-    if next_record:
-        response = route53.list_resource_record_sets(
-            HostedZoneId=zone_id,
-            StartRecordName=next_record[0],
-            StartRecordType=next_record[1]
-        )
-    else:
-        response = route53.list_resource_record_sets(HostedZoneId=zone_id)
+    try:
+        if next_record:
+            response = route53.list_resource_record_sets(
+                HostedZoneId=zone_id,
+                StartRecordName=next_record[0],
+                StartRecordType=next_record[1]
+            )
+        else:
+            response = route53.list_resource_record_sets(HostedZoneId=zone_id)
+    except Exception as e:
+        raise Exception(f"Failed to list zone records due to {e}")
+
     zone_records = response['ResourceRecordSets']
     # if response is truncated, call function again with next record name/id
     if response['IsTruncated']:
