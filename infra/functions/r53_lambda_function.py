@@ -1,17 +1,17 @@
 """AWS Route 53 Lambda Backup"""
 
-import os
 import csv
 import json
+import os
 import time
 from datetime import datetime
+from pathlib import Path
+
 import boto3
-from botocore.exceptions import ClientError
 
 try:
     s3_bucket_name = os.environ['s3_bucket_name']
     s3_bucket_region = os.environ['s3_bucket_region']
-    r53_zone_id = os.environ['r53_zone_id']
 except KeyError as e:
     print("Warning: Environmental variable(s) not defined")
 
@@ -22,15 +22,41 @@ route53 = boto3.client('route53')
 
 
 # Functions
-def upload_to_s3(folder: object, filename: object, bucket_name: object, key: object) -> object:
+def upload_to_s3(folder: str, filename: Path, bucket_name: str, key: str) -> None:
     """Upload a file to a folder in an Amazon S3 bucket."""
-    key = folder + '/' + key
-    s3.upload_file(filename, bucket_name, key)
+    if not filename.exists():
+        raise FileNotFoundError(f"{filename} does not exist.")
+
+    key = folder + "/" + key
+    try:
+        s3.upload_file(str(filename), bucket_name, key)
+        print(f"Uploaded {filename} to {bucket_name}/{key}")
+    except Exception as e:
+        raise Exception(f"Failed to upload {filename} to S3 bucket {bucket_name} due to {e}")
+
+
+def get_route53_hosted_zones(next_zone=None):
+    """Recursively returns a list of hosted zones in Amazon Route 53."""
+    if next_zone:
+        response = route53.list_hosted_zones_by_name(
+            DNSName=next_zone[0],
+            HostedZoneId=next_zone[1]
+        )
+    else:
+        response = route53.list_hosted_zones_by_name()
+    hosted_zones = response['HostedZones']
+    # if response is truncated, call function again with next zone name/id
+    if response['IsTruncated']:
+        hosted_zones += get_route53_hosted_zones(
+            (response['NextDNSName'],
+             response['NextHostedZoneId'])
+        )
+    return hosted_zones
 
 
 def get_route53_zone_records(zone_id, next_record=None):
     """Recursively returns a list of records of a hosted zone in Route 53."""
-    if (next_record):
+    if next_record:
         response = route53.list_resource_record_sets(
             HostedZoneId=zone_id,
             StartRecordName=next_record[0],
@@ -40,7 +66,7 @@ def get_route53_zone_records(zone_id, next_record=None):
         response = route53.list_resource_record_sets(HostedZoneId=zone_id)
     zone_records = response['ResourceRecordSets']
     # if response is truncated, call function again with next record name/id
-    if (response['IsTruncated']):
+    if response['IsTruncated']:
         zone_records += get_route53_zone_records(
             zone_id,
             (response['NextRecordName'],
@@ -126,8 +152,8 @@ def lambda_handler(event, context):
                                datetime.utcnow().utctimetuple()
                                )
 
-    hosted_zones = get_route53_hosted_zones()
-    for zone in hosted_zones:
+    hosted_zoned = get_route53_hosted_zones()
+    for zone in hosted_zoned:
         zone_folder = (time_stamp + '/' + zone['Name'][:-1])
         zone_records = get_route53_zone_records(zone['Id'])
         upload_to_s3(

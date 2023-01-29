@@ -38,8 +38,6 @@
     "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
     "@aws-cdk/aws-route53-patters:useCertificate": true,
     "@aws-cdk/customresources:installLatestAwsSdkDefault": false,
-    "namespace": "r53-backup",
-    "hosted_zone_name": "example",
-    "hosted_zone_id": "XXXXXSASDDSD121313"
+    "namespace": "r53-backup"
   }
 }
