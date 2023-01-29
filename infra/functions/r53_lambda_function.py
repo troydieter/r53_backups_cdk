@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import time
+from datetime import datetime
 from typing import Optional, Tuple, List
 
 import boto3
@@ -154,7 +155,7 @@ def write_zone_to_json(zone, zone_records):
 
 def lambda_handler(event, context):
     """Handler function for AWS Lambda"""
-    time_stamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
+    time_stamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
 
     hosted_zoned = get_route53_hosted_zones()
     for zone in hosted_zoned:

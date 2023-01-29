@@ -7,8 +7,8 @@ from aws_cdk.aws_iam import ManagedPolicy
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_s3 import Bucket, BlockPublicAccess, BucketEncryption, LifecycleRule, Transition, StorageClass
 from aws_cdk.aws_sns import Topic
-from constructs import Construct
 from cdk_watchful import Watchful
+from constructs import Construct
 
 
 class R53Stack(Stack):
@@ -19,7 +19,7 @@ class R53Stack(Stack):
         Tags.of(self).add("project", namespace)
 
         # Amazon SNS Topic for alerting events
-        watchful_topic = Topic(self, "WatchfulTopic")
+        watchful_topic = Topic(self, "WatchfulTopic", fifo=True)
         wf = Watchful(self, "Watchful", alarm_sns=watchful_topic, dashboard_name=f"{namespace}-r53-dashboard")
         wf.watch_scope(self)
 
