@@ -3,22 +3,26 @@
 import csv
 import json
 import os
-import time
 from datetime import datetime
 from typing import Optional, Tuple, List
 
 import boto3
 
-try:
-    s3_bucket_name = os.environ['s3_bucket_name']
-    s3_bucket_region = os.environ['s3_bucket_region']
-except KeyError as e:
-    print("Warning: Environmental variable(s) not defined")
+
+def get_env_variable(var_name: str) -> str:
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        raise Exception(f"Environmental variable {var_name} not defined")
+
+
+s3_bucket_name = get_env_variable('s3_bucket_name')
+s3_bucket_region = get_env_variable('s3_bucket_region')
 
 # Create client objects
 
-s3 = boto3.client('s3', region_name=s3_bucket_region)
-route53 = boto3.client('route53')
+s3_client = boto3.client('s3', region_name=s3_bucket_region)
+route53_client = boto3.client('route53')
 
 
 # Functions
@@ -26,32 +30,29 @@ def upload_to_s3(folder: str, filename: str, bucket_name: str, key: str) -> None
     """Upload a file to a folder in an Amazon S3 bucket."""
     key = folder + "/" + key
     try:
-        s3.upload_file(str(filename), bucket_name, key)
+        s3_client.upload_file(str(filename), bucket_name, key)
         print(f"Uploaded {filename} to {bucket_name}/{key}")
     except Exception as e:
         raise Exception(f"Failed to upload {filename} to S3 bucket {bucket_name} due to {e}")
 
 
-def get_route53_hosted_zones(next_zone: Optional[Tuple[str, str]] = None) -> List[dict]:
+def get_route53_hosted_zones(route53_client: object, next_zone: Optional[Tuple[str, str]] = None) -> List[dict]:
     """Recursively returns a list of hosted zones in Amazon Route 53."""
     try:
         if next_zone:
-            response = route53.list_hosted_zones_by_name(
+            response = route53_client.list_hosted_zones_by_name(
                 DNSName=next_zone[0],
                 HostedZoneId=next_zone[1]
             )
         else:
-            response = route53.list_hosted_zones_by_name()
+            response = route53_client.list_hosted_zones_by_name()
     except Exception as e:
         raise Exception(f"Failed to list hosted zones due to {e}")
 
     hosted_zones = response['HostedZones']
     # if response is truncated, call function again with next zone name/id
     if response['IsTruncated']:
-        hosted_zones += get_route53_hosted_zones(
-            (response['NextDNSName'],
-             response['NextHostedZoneId'])
-        )
+        hosted_zones += get_route53_hosted_zones(route53_client, (response['NextDNSName'], response['NextHostedZoneId']))
     return hosted_zones
 
 
@@ -59,13 +60,13 @@ def get_route53_zone_records(zone_id: str, next_record: Optional[Tuple[str, str]
     """Recursively returns a list of records of a hosted zone in Route 53."""
     try:
         if next_record:
-            response = route53.list_resource_record_sets(
+            response = route53_client.list_resource_record_sets(
                 HostedZoneId=zone_id,
                 StartRecordName=next_record[0],
                 StartRecordType=next_record[1]
             )
         else:
-            response = route53.list_resource_record_sets(HostedZoneId=zone_id)
+            response = route53_client.list_resource_record_sets(HostedZoneId=zone_id)
     except Exception as e:
         raise Exception(f"Failed to list zone records due to {e}")
 
@@ -82,18 +83,12 @@ def get_route53_zone_records(zone_id: str, next_record: Optional[Tuple[str, str]
 
 def get_record_value(record):
     """Return a list of values for a hosted zone record."""
-    # test if record's value is Alias or dict of records
-    try:
-        value = [':'.join(
-            ['ALIAS', record['AliasTarget']['HostedZoneId'],
-             record['AliasTarget']['DNSName']]
-        )]
-    except KeyError:
-        value = []
-        for v in record['ResourceRecords']:
-            value.append(v['Value'])
+    alias = record.get('AliasTarget')
+    if alias:
+        value = [':'.join(['ALIAS', alias['HostedZoneId'], alias['DNSName']])]
+    else:
+        value = [v['Value'] for v in record.get('ResourceRecords', [])]
     return value
-
 
 def try_record(test, record):
     """Return a value for a record"""
