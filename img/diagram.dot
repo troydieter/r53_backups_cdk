@@ -1,0 +1,202 @@
+digraph "Diagram" {
+  splines = "ortho";
+  pad = "1.0";
+  nodesep = "0.60";
+  ranksep = "0.75";
+  fontname = "Sans-Serif";
+  fontsize = "15";
+  dpi = "200";
+  rankdir = "BT";
+  compound = "true";
+  fontcolor = "#222222";
+  edge [
+    color = "#D5871488",
+    penwidth = 2,
+    arrowhead = "dot",
+    arrowtail = "dot",
+  ];
+  node [
+    shape = "box",
+    style = "rounded",
+    fixedsize = true,
+    width = 1.7,
+    height = 1.7,
+    labelloc = "c",
+    imagescale = true,
+    fontname = "Sans-Serif",
+    fontsize = 8,
+    margin = 8,
+  ];
+  subgraph "R53BackupStack" {
+    subgraph "cluster-SubGraph.R53BackupStack" {
+      graph [
+        label = "R53BackupStack",
+        labelloc = "b",
+        labeljust = "l",
+        margin = "10",
+        fontsize = "16",
+        penwidth = "2",
+        pencolor = "#888888",
+        style = "filled,rounded",
+        fillcolor = "#e4e4e4",
+      ];
+      "R53BackupStack/AlertTopic" [
+        label = " AlertTopic",
+        fontsize = 12,
+        image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_App-Integration/Arch_64/Arch_AWS-Simple-Notification-Service_64@5x.png",
+        imagescale = "true",
+        imagepos = "tc",
+        penwidth = "0",
+        shape = "node",
+        fixedsize = "true",
+        labelloc = "b",
+        width = 2,
+        height = 2.266,
+      ];
+      "R53BackupStack/R53BackupBucket" [
+        label = " R53BackupBucket",
+        fontsize = 12,
+        image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Storage/64/Arch_Amazon-S3-Standard_64@5x.png",
+        imagescale = "true",
+        imagepos = "tc",
+        penwidth = "0",
+        shape = "node",
+        fixedsize = "true",
+        labelloc = "b",
+        width = 2,
+        height = 2.266,
+      ];
+      "R53BackupStack/R53_import_function" [
+        label = " R53_import_function",
+        fontsize = 12,
+        image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Compute/64/Arch_AWS-Lambda_64@5x.png",
+        imagescale = "true",
+        imagepos = "tc",
+        penwidth = "0",
+        shape = "node",
+        fixedsize = "true",
+        labelloc = "b",
+        width = 2,
+        height = 2.266,
+      ];
+      "R53BackupStack/Run Daily at 08_00 hrs UTC (03_00 EST)" [
+        label = " Run Daily at 08:00\nhrs UTC (03:00 EST)",
+        fontsize = 12,
+        image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_App-Integration/Arch_64/Arch_Amazon-EventBridge_64@5x.png",
+        imagescale = "true",
+        imagepos = "tc",
+        penwidth = "0",
+        shape = "node",
+        fixedsize = "true",
+        labelloc = "b",
+        width = 1.2,
+        height = 1.682,
+      ];
+      subgraph "cluster-SubGraph.Watchful" {
+        graph [
+          label = "Watchful",
+          labelloc = "b",
+          labeljust = "l",
+          margin = "10",
+          fontsize = "16",
+          penwidth = "2",
+          pencolor = "#888888",
+          style = "filled,rounded",
+          fillcolor = "#d6d6d6",
+        ];
+        "R53BackupStack/Watchful/Dashboard" [
+          label = " Dashboard",
+          fontsize = 12,
+          image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_Amazon-CloudWatch_64@5x.png",
+          imagescale = "true",
+          imagepos = "tc",
+          penwidth = "0",
+          shape = "node",
+          fixedsize = "true",
+          labelloc = "b",
+          width = 1.2,
+          height = 1.466,
+        ];
+        subgraph "cluster-SubGraph.R53BackupStackR53importfunction9507AE39" {
+          graph [
+            label = "R53BackupStackR53importfunction9507AE39",
+            labelloc = "b",
+            labeljust = "l",
+            margin = "10",
+            fontsize = "16",
+            penwidth = "2",
+            pencolor = "#888888",
+            style = "filled,rounded",
+            fillcolor = "#c7c7c7",
+          ];
+          "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ErrorsAlarm" [
+            label = " ErrorsAlarm",
+            fontsize = 12,
+            image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_Amazon-CloudWatch_64@5x.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 1.2,
+            height = 1.466,
+          ];
+          "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ThrottlesAlarm" [
+            label = " ThrottlesAlarm",
+            fontsize = 12,
+            image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_Amazon-CloudWatch_64@5x.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 1.2,
+            height = 1.466,
+          ];
+          "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/DurationAlarm" [
+            label = " DurationAlarm",
+            fontsize = 12,
+            image = "/home/tdieter/.nvm/versions/node/v16.17.0/lib/node_modules/cdk-dia/icons/aws/Service/Arch_Management-Governance/64/Arch_Amazon-CloudWatch_64@5x.png",
+            imagescale = "true",
+            imagepos = "tc",
+            penwidth = "0",
+            shape = "node",
+            fixedsize = "true",
+            labelloc = "b",
+            width = 1.2,
+            height = 1.466,
+          ];
+        }
+      }
+    }
+  }
+  "R53BackupStack/Watchful/Dashboard" -> "R53BackupStack/R53_import_function" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ErrorsAlarm" -> "R53BackupStack/AlertTopic" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ErrorsAlarm" -> "R53BackupStack/R53_import_function" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ThrottlesAlarm" -> "R53BackupStack/AlertTopic" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/ThrottlesAlarm" -> "R53BackupStack/R53_import_function" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/DurationAlarm" -> "R53BackupStack/AlertTopic" [
+    dir = "both",
+  ];
+  "R53BackupStack/Watchful/R53BackupStackR53importfunction9507AE39/DurationAlarm" -> "R53BackupStack/R53_import_function" [
+    dir = "both",
+  ];
+  "R53BackupStack/R53_import_function" -> "R53BackupStack/R53BackupBucket" [
+    dir = "both",
+  ];
+  "R53BackupStack/Run Daily at 08_00 hrs UTC (03_00 EST)" -> "R53BackupStack/R53_import_function" [
+    dir = "both",
+  ];
+}
