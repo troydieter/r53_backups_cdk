@@ -1,58 +1,17 @@
 
-# Welcome to your CDK Python project!
+# Amazon Route53 Backup
 
-This is a blank project for CDK development with Python.
+## Overview
+This solution deploys an AWS Lambda function that runs at 03:00AM EST (08:00 UTC) daily and backs up all of your Amazon Route53 zones and records daily. The zones and its contents are saved as both `.json` and `.csv` in Amazon S3 and are storage-tiered after 30 days, along with expiring after 1yr. You are welcome to change any of the values!
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Requirements
+1. Install `aws-cdk` if you haven't already (AWS CDK v2.x): https://aws.amazon.com/cdk/
+2. Run `cdk deploy`
+3. Use the CloudFormation outputs to view the Amazon S3 output bucket, to view the backed up records
+4. Subscribe to the `AlertTopic` (as shown below) for Lambda function invocation errors/etc. 
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+## Diagram
+![Diagram](img/diagram.png)
 
-To manually create a virtualenv on MacOS and Linux:
-
-```
-$ python -m venv .venv
-```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
-
-Enjoy!
+## Additional Information
+Come visit us at https://www.troydieter.com or open a PR! Thanks!
