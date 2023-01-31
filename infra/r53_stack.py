@@ -20,14 +20,13 @@ class R53Stack(Stack):
         Tags.of(self).add("project", namespace)
 
         # Amazon SNS Topic for alerting events
-        notification_topic = Topic(self, "WatchfulTopic")
+        notification_topic = Topic(self, "AlertTopic", display_name=f"Alert Topic for {namespace}")
 
         # Monitoring
         wf = Watchful(self, "Watchful", alarm_sns=notification_topic, dashboard_name=f"{namespace}-r53-dashboard")
         wf.watch_scope(self)
 
         # Route53 S3 Backup Bucket
-        # noinspection PyTypeChecker
         backup_bucket = Bucket(self, "R53BackupBucket",
                                block_public_access=BlockPublicAccess.BLOCK_ALL,
                                encryption=BucketEncryption.S3_MANAGED,
@@ -37,7 +36,7 @@ class R53Stack(Stack):
                                lifecycle_rules=[LifecycleRule(transitions=[
                                    Transition(storage_class=StorageClass.INTELLIGENT_TIERING,
                                               transition_after=Duration.days(30))
-                               ])],
+                               ]), LifecycleRule(expiration=Duration.days(365))],
                                )
 
         # Create the Lambda function to facilitate all of this
