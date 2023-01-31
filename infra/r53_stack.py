@@ -57,8 +57,9 @@ class R53Stack(Stack):
         # Create the EventBridge rules
         backup_frequency_rule = Rule(
             self,
-            "Run Daily at 21:00 hrs UTC",
-            schedule=Schedule.cron(minute="00", hour="21", week_day="*", month="*", year="*"),
+            "Run Daily at 03:00 hrs UTC",
+            schedule=Schedule.cron(minute="47", hour="03", week_day="*", month="*", year="*"),
+            # schedule=Schedule.cron(minute="00", hour="08", week_day="*", month="*", year="*"),
         )
 
         backup_frequency_rule.add_target(LambdaFunction(r53_backup_func))

@@ -36,7 +36,7 @@ def upload_to_s3(folder: str, filename: str, bucket_name: str, key: str) -> None
         raise Exception(f"Failed to upload {filename} to S3 bucket {bucket_name} due to {e}")
 
 
-def get_route53_hosted_zones(route53_client: object, next_zone: Optional[Tuple[str, str]] = None) -> List[dict]:
+def get_route53_hosted_zones(next_zone: Optional[Tuple[str, str]] = None) -> List[dict]:
     """Recursively returns a list of hosted zones in Amazon Route 53."""
     try:
         if next_zone:
@@ -52,7 +52,10 @@ def get_route53_hosted_zones(route53_client: object, next_zone: Optional[Tuple[s
     hosted_zones = response['HostedZones']
     # if response is truncated, call function again with next zone name/id
     if response['IsTruncated']:
-        hosted_zones += get_route53_hosted_zones(route53_client, (response['NextDNSName'], response['NextHostedZoneId']))
+        hosted_zones += get_route53_hosted_zones(
+            (response['NextDNSName'],
+             response['NextHostedZoneId'])
+        )
     return hosted_zones
 
 
@@ -89,6 +92,7 @@ def get_record_value(record):
     else:
         value = [v['Value'] for v in record.get('ResourceRecords', [])]
     return value
+
 
 def try_record(test, record):
     """Return a value for a record"""
@@ -146,8 +150,7 @@ def write_zone_to_json(zone, zone_records):
     return zone_file_name
 
 
-## HANDLER FUNCTION ##
-
+# HANDLER FUNCTION
 def lambda_handler(event, context):
     """Handler function for AWS Lambda"""
     time_stamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
