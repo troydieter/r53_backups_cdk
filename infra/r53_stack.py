@@ -40,7 +40,7 @@ class R53Stack(Stack):
                                )
 
         # Create the Lambda function to facilitate all of this
-        r53_backup_func = Function(self, "R53_import_function", runtime=Runtime.PYTHON_3_9,
+        r53_backup_func = Function(self, "R53_import_function", runtime=Runtime.PYTHON_3_12,
                                    handler="r53_lambda_function.lambda_handler",
                                    code=Code.from_asset(path="infra/functions"),
                                    environment={
