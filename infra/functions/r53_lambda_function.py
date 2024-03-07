@@ -149,27 +149,32 @@ def write_zone_to_json(zone, zone_records):
         return None
     return zone_file_name
 
-
-# HANDLER FUNCTION
+# Function to faciliate record processing to be stored in Amazon S3
 def lambda_handler(event, context):
-    """Handler function for AWS Lambda"""
     time_stamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
 
-    hosted_zoned = get_route53_hosted_zones()
-    for zone in hosted_zoned:
-        zone_folder = (time_stamp + '/' + zone['Name'][:-1])
+    hosted_zones = get_route53_hosted_zones()
+    processed_zones = set()  # Set to keep track of processed zone names
+    for zone in hosted_zones:
+        zone_name = zone['Name'][:-1]  # Remove the trailing dot
+        # Check if the zone name has already been processed
+        if zone_name in processed_zones:
+            zone_folder = (time_stamp + '/' + zone_name + '_duplicate')
+        else:
+            zone_folder = (time_stamp + '/' + zone_name)
+        processed_zones.add(zone_name)  # Add zone name to processed set
         zone_records = get_route53_zone_records(zone['Id'])
         upload_to_s3(
             zone_folder,
             write_zone_to_csv(zone, zone_records),
             s3_bucket_name,
-            (zone['Name'] + 'csv')
+            (zone_name + '.csv')
         )
         upload_to_s3(
             zone_folder,
             write_zone_to_json(zone, zone_records),
             s3_bucket_name,
-            (zone['Name'] + 'json')
+            (zone_name + '.json')
         )
     return True
 
