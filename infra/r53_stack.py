@@ -62,7 +62,7 @@ class R53Stack(Stack):
         # Create the EventBridge rules
         backup_frequency_rule = Rule(
             self,
-            f"Route53 Backup Function - {schedule_hour}:{schedule_minute} weekday:{schedule_week_day} month:{schedule_month} year:{schedule_year}",
+            f"Route53 Backup Function - Recurring: {schedule_hour}:{schedule_minute} - {schedule_month}:{schedule_week_day}:{schedule_year}",
             schedule=Schedule.cron(minute=schedule_minute, hour=schedule_hour, week_day=schedule_week_day, month=schedule_month, year=schedule_year)
         )
 
