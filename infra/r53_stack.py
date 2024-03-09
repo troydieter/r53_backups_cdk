@@ -17,6 +17,11 @@ class R53Stack(Stack):
     def __init__(self, scope: Construct, construct_id: str, props, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         namespace = props["namespace"]
+        schedule_minute = props["schedule_minute"]
+        schedule_hour = props["schedule_hour"]
+        schedule_week_day = props["schedule_week_day"]
+        schedule_month = props["schedule_month"]
+        schedule_year = props["schedule_year"]
         Tags.of(self).add("project", namespace)
 
         # Amazon SNS Topic for alerting events
@@ -57,8 +62,8 @@ class R53Stack(Stack):
         # Create the EventBridge rules
         backup_frequency_rule = Rule(
             self,
-            "Run Daily at 08:00 hrs UTC",
-            schedule=Schedule.cron(minute="00", hour="8", week_day="*", month="*", year="*"),
+            f"Route53 Backup Function - {schedule_hour}:{schedule_minute} weekday:{schedule_week_day} month:{schedule_month} year:{schedule_year}",
+            schedule=Schedule.cron(minute=schedule_minute, hour=schedule_hour, week_day=schedule_week_day, month=schedule_month, year=schedule_year)
         )
 
         backup_frequency_rule.add_target(LambdaFunction(r53_backup_func))

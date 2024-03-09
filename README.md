@@ -12,7 +12,7 @@ This solution deploys an AWS Lambda function that runs at 08:00 UTC daily and ba
 5. Utilize these files to restore your Amazon Route53 records as needed.
 
 ## Timing
-This will run daily at `08:00` UTC (03:00AM EST)
+This will run daily at `08:00` UTC (03:00AM EST) - If you'd like to change the timing, refer to `cdk.json` and adjust the `schedule_` parameters. More info is available here: https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_events/Schedule.html
 
 ## Lifecycle Rules
 ### Bucket Configuration

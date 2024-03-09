@@ -38,6 +38,11 @@
     "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
     "@aws-cdk/aws-route53-patters:useCertificate": true,
     "@aws-cdk/customresources:installLatestAwsSdkDefault": false,
-    "namespace": "r53-backup"
+    "namespace": "r53-backup",
+    "schedule_minute": "00",
+    "schedule_hour": "8",
+    "schedule_week_day": "*",
+    "schedule_month": "*",
+    "schedule_year": "*"
   }
 }
