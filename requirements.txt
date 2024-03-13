@@ -1,4 +1,4 @@
-aws-cdk-lib==2.132.0
+aws-cdk-lib==2.132.1
 constructs>=10.0.0,<11.0.0
 boto3
 cdk-watchful
